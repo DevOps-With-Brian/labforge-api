@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "labforge-api"
+version = "0.1.0"
+description = "A FastAPI backend API for managing labs/training for UI"
+authors = ["DevOps-With-Brian"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.5"
+uvicorn = {extras = ["standard"], version = "^0.32.1"}
+pydantic = "^2.10.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+httpx = "^0.28.1"
+ruff = "^0.8.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
