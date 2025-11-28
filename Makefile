@@ -35,13 +35,13 @@ test-cov-integration: ## Run integration tests with coverage
 db-upgrade: ## Apply alembic migrations (Docker Compose)
 	$(COMPOSE) run --rm api poetry run alembic upgrade head
 
-db-downgrade: ## Roll back 1 alembic migration (Docker Compose)
+db-downgrade: ## Roll back alembic migrations (Docker Compose, example steps=1)
 	$(COMPOSE) run --rm api poetry run alembic downgrade -1
 
 db-upgrade-local: ## Apply alembic migrations locally (no Docker, e.g. for SQLite)
 	poetry run alembic upgrade head
 
-db-downgrade-local: ## Roll back 1 alembic migration locally (no Docker)
+db-downgrade-local: ## Roll back alembic migrations locally (no Docker, example steps=1)
 	poetry run alembic downgrade -1
 docker-test: ## Run tests inside the api container
 	$(COMPOSE) run --rm api poetry run pytest
