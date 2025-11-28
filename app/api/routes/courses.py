@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,16 +21,6 @@ from app.schemas import (
 )
 
 router = APIRouter()
-
-
-def _to_db_dict(payload: BaseModel, *, exclude_unset: bool = False) -> dict[str, Any]:
-    """Convert a Pydantic model to a dict suitable for SQLAlchemy models.
-
-    Uses `mode="json"` to serialize complex types (e.g., HttpUrl) to their
-    JSON-compatible string representations, which is required because SQLAlchemy
-    models expect string types for URL fields rather than Pydantic's URL objects.
-    """
-    return payload.model_dump(mode="json", exclude_unset=exclude_unset)
 
 
 async def _get_course_or_404(session: AsyncSession, course_id: str) -> CourseModel:
@@ -105,7 +92,7 @@ async def create_course(
     payload: CourseCreate, session: AsyncSession = Depends(get_session)
 ) -> CoursePublic:
     """Create a new course."""
-    course = CourseModel(**_to_db_dict(payload))
+    course = CourseModel(**payload.model_dump(mode="json"))
     session.add(course)
     await session.commit()
     await session.refresh(course)
@@ -127,7 +114,7 @@ async def update_course(
 ) -> CoursePublic:
     """Update course metadata."""
     course = await _get_course_or_404(session, course_id)
-    updates = _to_db_dict(payload, exclude_unset=True)
+    updates = payload.model_dump(exclude_unset=True, mode="json")
     if updates:
         for key, value in updates.items():
             setattr(course, key, value)
@@ -148,7 +135,7 @@ async def create_enrollment(
 ) -> Enrollment:
     """Enroll a learner in a self-paced course."""
     await _get_course_or_404(session, course_id)
-    enrollment = EnrollmentModel(course_id=course_id, **_to_db_dict(payload))
+    enrollment = EnrollmentModel(course_id=course_id, **payload.model_dump(mode="json"))
     session.add(enrollment)
     await session.commit()
     await session.refresh(enrollment)
@@ -184,7 +171,7 @@ async def attach_lab(
 ) -> LabExercise:
     """Attach a lab exercise to a course."""
     await _get_course_or_404(session, course_id)
-    lab = LabExerciseModel(course_id=course_id, **_to_db_dict(payload))
+    lab = LabExerciseModel(course_id=course_id, **payload.model_dump(mode="json"))
     session.add(lab)
     await session.commit()
     await session.refresh(lab)
