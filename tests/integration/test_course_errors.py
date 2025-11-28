@@ -9,23 +9,7 @@ from app.main import app
 client = TestClient(app, raise_server_exceptions=False)
 
 
-def build_course_payload(**overrides):
-    """Build a valid course payload with optional overrides."""
-    payload = {
-        "title": "DevOps With Brian: CI/CD Foundations",
-        "overview": "Hands-on course covering pipelines and Kubernetes delivery.",
-        "instructor": "Brian T",
-        "primary_video_url": "https://youtube.com/devopswithbrian",
-        "supplemental_urls": ["https://github.com/devops-with-brian/sample-repo"],
-        "duration_minutes": 120,
-        "difficulty": "intermediate",
-        "tags": ["devops", "kubernetes"],
-        "prerequisites": ["Basic Git", "Docker fundamentals"],
-        "category": "DevOps",
-        "status": "published",
-    }
-    payload.update(overrides)
-    return payload
+from tests.conftest import build_course_payload
 
 
 def test_get_nonexistent_course():
