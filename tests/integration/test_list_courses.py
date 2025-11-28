@@ -1,11 +1,13 @@
 """Integration tests for list courses functionality."""
 
 from fastapi.testclient import TestClient
-from tests.conftest import build_course_payload
 
 from app.main import app
+from tests.conftest import build_course_payload
 
 client = TestClient(app, raise_server_exceptions=False)
+
+
 def test_list_empty_courses():
     """Test listing courses when database is empty."""
     response = client.get("/courses")

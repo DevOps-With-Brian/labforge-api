@@ -3,11 +3,11 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.conftest import build_course_payload
 
 client = TestClient(app, raise_server_exceptions=False)
 
 
-from tests.conftest import build_course_payload
 def test_update_course_title():
     """Test updating just the course title."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
