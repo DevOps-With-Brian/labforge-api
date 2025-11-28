@@ -3,7 +3,17 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from app.schemas.courses import CourseStatus
@@ -57,6 +67,9 @@ class Enrollment(Base):
     """Enrollment record for a learner in a course."""
 
     __tablename__ = "enrollments"
+    __table_args__ = (
+        UniqueConstraint("course_id", "email", name="uq_enrollment_course_email"),
+    )
 
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid4())

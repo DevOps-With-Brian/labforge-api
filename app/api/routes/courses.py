@@ -135,6 +135,20 @@ async def create_enrollment(
 ) -> Enrollment:
     """Enroll a learner in a self-paced course."""
     await _get_course_or_404(session, course_id)
+
+    # Check for existing enrollment with the same email in this course
+    existing = await session.scalar(
+        select(EnrollmentModel).where(
+            EnrollmentModel.course_id == course_id,
+            EnrollmentModel.email == payload.email,
+        )
+    )
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Learner is already enrolled in this course",
+        )
+
     enrollment = EnrollmentModel(course_id=course_id, **payload.model_dump(mode="json"))
     session.add(enrollment)
     await session.commit()

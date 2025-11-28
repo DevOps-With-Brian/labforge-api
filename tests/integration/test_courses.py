@@ -96,3 +96,45 @@ def test_fetch_missing_course_returns_404():
     missing_id = uuid4()
     response = client.get(f"/courses/{missing_id}")
     assert response.status_code == 404
+
+
+def test_duplicate_enrollment_returns_409():
+    """Test that enrolling the same email twice in a course returns 409 Conflict."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    # First enrollment should succeed
+    first = client.post(
+        f"/courses/{course_id}/enrollments",
+        json={"name": "Test Learner", "email": "duplicate@example.com"},
+    )
+    assert first.status_code == 201
+
+    # Second enrollment with the same email should fail
+    second = client.post(
+        f"/courses/{course_id}/enrollments",
+        json={"name": "Test Learner", "email": "duplicate@example.com"},
+    )
+    assert second.status_code == 409
+    assert "already enrolled" in second.json()["detail"]
+
+
+def test_same_email_different_courses_allowed():
+    """Test that the same email can enroll in different courses."""
+    course1_id = client.post("/courses", json=build_course_payload()).json()["id"]
+    course2_id = client.post(
+        "/courses", json=build_course_payload(title="Another Course")
+    ).json()["id"]
+
+    # Enroll in first course
+    first = client.post(
+        f"/courses/{course1_id}/enrollments",
+        json={"name": "Test Learner", "email": "multi@example.com"},
+    )
+    assert first.status_code == 201
+
+    # Same email can enroll in a different course
+    second = client.post(
+        f"/courses/{course2_id}/enrollments",
+        json={"name": "Test Learner", "email": "multi@example.com"},
+    )
+    assert second.status_code == 201
