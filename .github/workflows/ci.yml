@@ -147,7 +147,7 @@ jobs:
 
       - name: Test Docker Compose
         run: |
-          docker-compose up -d
+          docker compose up -d
           sleep 10
-          docker-compose exec -T api poetry run alembic upgrade head
-          docker-compose down -v
+          docker compose exec -T api poetry run alembic upgrade head
+          docker compose down -v
