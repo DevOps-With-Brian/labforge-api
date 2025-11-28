@@ -18,14 +18,26 @@ class CourseStatus(str, Enum):
 
 
 class CourseBase(APIModel):
-    """Shared fields across course operations."""
+    """Shared fields across course operations.
+
+    Note on duration_minutes:
+        Maximum course duration is 14,400 minutes (10 days). This limit represents
+        a practical upper bound for self-paced course content. Courses exceeding
+        this limit should be split into multiple courses or a learning path.
+        This constraint is enforced at the API validation layer.
+    """
 
     title: str = Field(..., min_length=3, max_length=140)
     overview: str | None = Field(None, max_length=3000)
     instructor: str = Field(..., min_length=2, max_length=80)
     primary_video_url: HttpUrl
     supplemental_urls: list[HttpUrl] = Field(default_factory=list)
-    duration_minutes: int = Field(..., gt=0, lt=14_400)  # up to 10 days of content
+    duration_minutes: int = Field(
+        ...,
+        gt=0,
+        lt=14_400,
+        description="Course duration in minutes. Maximum is 14,400 (10 days).",
+    )
     difficulty: str = Field(
         default="intermediate", pattern="^(beginner|intermediate|advanced)$"
     )
@@ -48,7 +60,12 @@ class CourseUpdate(APIModel):
     instructor: str | None = Field(None, min_length=2, max_length=80)
     primary_video_url: HttpUrl | None = None
     supplemental_urls: list[HttpUrl] | None = None
-    duration_minutes: int | None = Field(None, gt=0, lt=14_400)
+    duration_minutes: int | None = Field(
+        None,
+        gt=0,
+        lt=14_400,
+        description="Course duration in minutes. Maximum is 14,400 (10 days).",
+    )
     difficulty: str | None = Field(None, pattern="^(beginner|intermediate|advanced)$")
     tags: list[str] | None = None
     prerequisites: list[str] | None = None
