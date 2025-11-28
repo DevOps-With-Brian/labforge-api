@@ -9,9 +9,32 @@ on:
       - main
 
 jobs:
+  # Check if only docs/non-code files changed
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for code changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - '!**.md'
+              - '!docs/**'
+              - '!.gitignore'
+              - '!LICENSE'
+
   lint:
     name: Lint and Format Check
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
 
     steps:
       - name: Checkout repository
@@ -49,6 +72,8 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
 
     services:
       postgres:
@@ -126,7 +151,8 @@ jobs:
   docker:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [changes, lint, test]
+    if: needs.changes.outputs.code == 'true'
 
     steps:
       - name: Checkout repository

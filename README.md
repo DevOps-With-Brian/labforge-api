@@ -8,7 +8,7 @@ A FastAPI backend for self-paced courses, enrollments, and attached lab exercise
 
 - Python 3.11+
 - Poetry
-- Docker (optional, for Postgres)
+- Docker (for Postgres)
 
 ## Project Structure
 
@@ -31,31 +31,6 @@ labforge-api/
 ```
 
 ## Setup
-
-### Local Development (SQLite default)
-
-1. Install Poetry if you haven't already:
-
-   ```bash
-   pip install poetry
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   poetry install
-   ```
-
-3. Run the development server (uses SQLite `labforge.db` by default):
-
-   ```bash
-   poetry run uvicorn app.main:app --reload
-   ```
-
-4. Open http://localhost:8000/docs to view the API docs.
-
-> Tip: You can create a `.env` file to set `DATABASE_URL` (and any future settings) for both the app and Alembic. Example:  
-> `DATABASE_URL=postgresql+asyncpg://labforge:labforge@localhost:5432/labforge`
 
 ### Running with Postgres (Docker Compose)
 
@@ -133,4 +108,4 @@ poetry run ruff format .
 - **Enrollments:** `POST/GET /courses/{course_id}/enrollments`
 - **Labs:** `POST/GET /courses/{course_id}/labs`
 
-OpenAPI docs: http://localhost:8000/docs or `/redoc`.
+OpenAPI docs: http://localhost:8000/docs
