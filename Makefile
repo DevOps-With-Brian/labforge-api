@@ -1,4 +1,6 @@
-.PHONY: help install dev test test-cov lint format format-check clean run docker-build docker-up docker-down
+.PHONY: help install dev test test-cov lint format format-check clean run docker-build docker-up docker-down docker-logs db-upgrade db-downgrade docker-test
+
+COMPOSE ?= docker compose
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -12,11 +14,32 @@ install: ## Install dependencies with Poetry
 dev: ## Install dependencies including dev dependencies
 	poetry install --no-interaction --with dev
 
-test: ## Run tests
+test: ## Run all tests
 	poetry run pytest
+
+test-unit: ## Run unit tests only
+	poetry run pytest tests/unit -v
+
+test-integration: ## Run integration tests only
+	poetry run pytest tests/integration -v
 
 test-cov: ## Run tests with coverage report
 	poetry run pytest --cov=app --cov-report=term-missing --cov-report=html
+
+test-cov-unit: ## Run unit tests with coverage
+	poetry run pytest tests/unit --cov=app --cov-report=term-missing
+
+test-cov-integration: ## Run integration tests with coverage
+	poetry run pytest tests/integration --cov=app --cov-report=term-missing
+
+db-upgrade: ## Apply alembic migrations
+	$(COMPOSE) run --rm api poetry run alembic upgrade head
+
+db-downgrade: ## Roll back alembic migrations (example steps=1)
+	$(COMPOSE) run --rm api poetry run alembic downgrade -1
+
+docker-test: ## Run tests inside the api container
+	$(COMPOSE) run --rm api poetry run pytest
 
 lint: ## Run linting with ruff
 	poetry run ruff check .
@@ -40,16 +63,16 @@ run: ## Run the FastAPI application
 	poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 docker-build: ## Build Docker image
-	docker-compose build
+	$(COMPOSE) build
 
 docker-up: ## Start Docker containers
-	docker-compose up -d
+	$(COMPOSE) up -d
 
 docker-down: ## Stop Docker containers
-	docker-compose down
+	$(COMPOSE) down
 
 docker-logs: ## View Docker container logs
-	docker-compose logs -f
+	$(COMPOSE) logs -f
 
 lock: ## Update poetry.lock file
 	poetry lock --no-update

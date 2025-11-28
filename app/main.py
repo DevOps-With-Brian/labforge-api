@@ -2,7 +2,8 @@
 
 from fastapi import FastAPI
 
-from app.models import HealthResponse
+from app.api import api_router
+from app.schemas.health import HealthResponse
 
 app = FastAPI(
     title="LabForge API",
@@ -15,3 +16,6 @@ app = FastAPI(
 async def health_check() -> HealthResponse:
     """Health check endpoint to verify the API is running."""
     return HealthResponse(status="healthy", message="LabForge API is running")
+
+
+app.include_router(api_router)
