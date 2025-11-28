@@ -5,11 +5,9 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.conftest import build_course_payload
 
 client = TestClient(app, raise_server_exceptions=False)
-
-
-from tests.conftest import build_course_payload
 
 
 def test_get_nonexistent_course():
