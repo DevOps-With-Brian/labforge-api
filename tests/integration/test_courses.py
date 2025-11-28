@@ -69,6 +69,143 @@ def test_enrollment_tracking():
     assert updated.json()["tags"] == ["finished"]
 
 
+def test_update_course_with_empty_payload():
+    """Test that updating a course with empty payload returns unchanged course."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+    original = client.get(f"/courses/{course_id}").json()
+
+    updated = client.patch(f"/courses/{course_id}", json={})
+    assert updated.status_code == 200
+
+    # Verify course is unchanged except for updated_at
+    updated_data = updated.json()
+    assert updated_data["title"] == original["title"]
+    assert updated_data["overview"] == original["overview"]
+    assert updated_data["instructor"] == original["instructor"]
+    assert updated_data["status"] == original["status"]
+    assert updated_data["tags"] == original["tags"]
+    assert updated_data["duration_minutes"] == original["duration_minutes"]
+
+
+def test_update_course_partial_update_only_changes_specified_fields():
+    """Test that PATCH only updates specified fields, leaving others unchanged."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+    original = client.get(f"/courses/{course_id}").json()
+
+    # Update only the title
+    updated = client.patch(f"/courses/{course_id}", json={"title": "New Title Here"})
+    assert updated.status_code == 200
+
+    updated_data = updated.json()
+    # Title should be updated
+    assert updated_data["title"] == "New Title Here"
+
+    # All other fields should remain unchanged
+    assert updated_data["overview"] == original["overview"]
+    assert updated_data["instructor"] == original["instructor"]
+    assert updated_data["status"] == original["status"]
+    assert updated_data["tags"] == original["tags"]
+    assert updated_data["prerequisites"] == original["prerequisites"]
+    assert updated_data["duration_minutes"] == original["duration_minutes"]
+    assert updated_data["difficulty"] == original["difficulty"]
+    assert updated_data["category"] == original["category"]
+    assert updated_data["primary_video_url"] == original["primary_video_url"]
+    assert updated_data["supplemental_urls"] == original["supplemental_urls"]
+
+
+def test_update_course_with_invalid_title_too_short():
+    """Test that updating with a title that is too short returns 422."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    updated = client.patch(f"/courses/{course_id}", json={"title": "AB"})
+    assert updated.status_code == 422
+
+
+def test_update_course_with_invalid_title_too_long():
+    """Test that updating with a title that is too long returns 422."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    updated = client.patch(f"/courses/{course_id}", json={"title": "A" * 141})
+    assert updated.status_code == 422
+
+
+def test_update_course_with_invalid_difficulty():
+    """Test that updating with invalid difficulty returns 422."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    updated = client.patch(f"/courses/{course_id}", json={"difficulty": "expert"})
+    assert updated.status_code == 422
+
+
+def test_update_course_with_invalid_duration():
+    """Test that updating with invalid duration returns 422."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    # Test zero duration
+    updated = client.patch(f"/courses/{course_id}", json={"duration_minutes": 0})
+    assert updated.status_code == 422
+
+    # Test negative duration
+    updated = client.patch(f"/courses/{course_id}", json={"duration_minutes": -5})
+    assert updated.status_code == 422
+
+
+def test_update_course_with_invalid_status():
+    """Test that updating with invalid status returns 422."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    updated = client.patch(f"/courses/{course_id}", json={"status": "invalid_status"})
+    assert updated.status_code == 422
+
+
+def test_update_course_with_invalid_instructor():
+    """Test that updating with a single character instructor returns 422."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    updated = client.patch(f"/courses/{course_id}", json={"instructor": "A"})
+    assert updated.status_code == 422
+
+
+def test_update_course_nonexistent_returns_404():
+    """Test that updating a non-existent course returns 404."""
+    nonexistent_id = uuid4()
+    updated = client.patch(
+        f"/courses/{nonexistent_id}", json={"title": "Updated Title"}
+    )
+    assert updated.status_code == 404
+
+
+def test_update_course_multiple_fields():
+    """Test updating multiple fields at once."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+    original = client.get(f"/courses/{course_id}").json()
+
+    update_payload = {
+        "title": "Updated Course Title",
+        "overview": "Updated overview content.",
+        "instructor": "Jane Doe",
+        "difficulty": "advanced",
+        "status": "draft",
+    }
+
+    updated = client.patch(f"/courses/{course_id}", json=update_payload)
+    assert updated.status_code == 200
+
+    updated_data = updated.json()
+    # Updated fields should reflect new values
+    assert updated_data["title"] == "Updated Course Title"
+    assert updated_data["overview"] == "Updated overview content."
+    assert updated_data["instructor"] == "Jane Doe"
+    assert updated_data["difficulty"] == "advanced"
+    assert updated_data["status"] == "draft"
+
+    # Unchanged fields should remain the same
+    assert updated_data["tags"] == original["tags"]
+    assert updated_data["prerequisites"] == original["prerequisites"]
+    assert updated_data["duration_minutes"] == original["duration_minutes"]
+    assert updated_data["category"] == original["category"]
+
+
 def test_attach_and_list_labs():
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
 
