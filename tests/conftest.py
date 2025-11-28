@@ -37,7 +37,7 @@ app.dependency_overrides[get_session] = override_get_session
 @pytest.fixture(autouse=True, scope="function")
 def reset_db():
     """Reset database tables between tests using a sync connection."""
-    # Use NullPool to prevent connection reuse issues
+        os.getenv("DATABASE_URL", "postgresql+asyncpg://labforge:labforge@localhost:5432/labforge").replace("postgresql+asyncpg://", "postgresql+psycopg://"),
     sync_engine = create_engine(
         "postgresql+psycopg://labforge:labforge@localhost:5432/labforge",
         poolclass=NullPool,
