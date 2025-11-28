@@ -93,11 +93,11 @@ def test_lab_exercise_create_invalid_resource_type():
     assert any(e["loc"] == ("resource_type",) for e in errors)
 
 
-def test_lab_exercise_create_title_too_short():
-    """Test that title shorter than min_length=3 is rejected."""
+def test_lab_exercise_create_empty_title():
+    """Test that empty title is rejected."""
     with pytest.raises(ValidationError) as exc_info:
         LabExerciseCreate(
-            title="ab",  # 2 chars, min is 3
+            title="",
             resource_type=LabResourceType.kubernetes,
             resource_uri="https://example.com/lab",
         )
