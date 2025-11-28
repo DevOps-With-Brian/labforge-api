@@ -62,8 +62,29 @@ async def list_courses(
     session: AsyncSession = Depends(get_session),
 ) -> list[CoursePublic]:
     """List all courses with aggregates."""
-    courses = (await session.execute(select(CourseModel))).scalars().all()
-    return [await _to_public(session, course) for course in courses]
+    stmt = (
+        select(
+            CourseModel,
+            func.count(EnrollmentModel.id).label("enrollment_count"),
+            func.count(LabExerciseModel.id).label("lab_count"),
+        )
+        .outerjoin(EnrollmentModel, EnrollmentModel.course_id == CourseModel.id)
+        .outerjoin(LabExerciseModel, LabExerciseModel.course_id == CourseModel.id)
+        .group_by(CourseModel.id)
+    )
+    result = await session.execute(stmt)
+    courses = []
+    for course, enrollment_count, lab_count in result.all():
+        base = CoursePublic.model_validate(course, from_attributes=True)
+        courses.append(
+            base.model_copy(
+                update={
+                    "enrollment_count": int(enrollment_count or 0),
+                    "lab_count": int(lab_count or 0),
+                }
+            )
+        )
+    return courses
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=CoursePublic)
