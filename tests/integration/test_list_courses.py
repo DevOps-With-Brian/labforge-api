@@ -40,7 +40,7 @@ def test_list_multiple_courses_with_varying_counts():
         "/courses",
         json=build_course_payload(title="Course 1"),
     ).json()["id"]
-    
+
     client.post(
         f"/courses/{course1_id}/enrollments",
         json={"name": "Student 1", "email": "student1@example.com"},
@@ -53,40 +53,40 @@ def test_list_multiple_courses_with_varying_counts():
             "resource_uri": "https://example.com/lab1",
         },
     )
-    
+
     # Create second course with no enrollments or labs
     course2_id = client.post(
         "/courses",
         json=build_course_payload(title="Course 2"),
     ).json()["id"]
-    
+
     # Create third course with multiple enrollments
     course3_id = client.post(
         "/courses",
         json=build_course_payload(title="Course 3"),
     ).json()["id"]
-    
+
     for i in range(3):
         client.post(
             f"/courses/{course3_id}/enrollments",
             json={"name": f"Student {i}", "email": f"student{i}@example.com"},
         )
-    
+
     # List all courses
     response = client.get("/courses")
     assert response.status_code == 200
     courses = response.json()
     assert len(courses) == 3
-    
+
     # Find each course and verify counts
     course1 = next(c for c in courses if c["id"] == course1_id)
     assert course1["enrollment_count"] == 1
     assert course1["lab_count"] == 1
-    
+
     course2 = next(c for c in courses if c["id"] == course2_id)
     assert course2["enrollment_count"] == 0
     assert course2["lab_count"] == 0
-    
+
     course3 = next(c for c in courses if c["id"] == course3_id)
     assert course3["enrollment_count"] == 3
     assert course3["lab_count"] == 0
@@ -95,7 +95,7 @@ def test_list_multiple_courses_with_varying_counts():
 def test_list_courses_with_multiple_labs():
     """Test course listing with multiple labs attached."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Add multiple labs
     for i in range(5):
         client.post(
@@ -106,7 +106,7 @@ def test_list_courses_with_multiple_labs():
                 "resource_uri": f"https://example.com/lab{i+1}",
             },
         )
-    
+
     # List courses
     response = client.get("/courses")
     assert response.status_code == 200
@@ -118,12 +118,12 @@ def test_list_courses_with_multiple_labs():
 def test_list_courses_returns_all_fields():
     """Test that list courses returns all expected fields."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.get("/courses")
     assert response.status_code == 200
     courses = response.json()
     assert len(courses) == 1
-    
+
     course = courses[0]
     # Verify all fields are present
     assert course["id"] == course_id

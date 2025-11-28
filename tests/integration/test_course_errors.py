@@ -93,11 +93,11 @@ def test_update_course_with_empty_payload():
     """Test updating a course with no changes still succeeds."""
     # Create a course first
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Update with empty payload (all fields optional)
     response = client.patch(f"/courses/{course_id}", json={})
     assert response.status_code == 200
-    
+
     # Verify course data unchanged
     course_data = response.json()
     assert course_data["title"] == "DevOps With Brian: CI/CD Foundations"
@@ -106,7 +106,7 @@ def test_update_course_with_empty_payload():
 def test_list_empty_enrollments():
     """Test listing enrollments for course with no enrollments."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.get(f"/courses/{course_id}/enrollments")
     assert response.status_code == 200
     assert response.json() == []
@@ -115,7 +115,7 @@ def test_list_empty_enrollments():
 def test_list_empty_labs():
     """Test listing labs for course with no labs."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.get(f"/courses/{course_id}/labs")
     assert response.status_code == 200
     assert response.json() == []
@@ -124,7 +124,7 @@ def test_list_empty_labs():
 def test_enrollment_with_notes():
     """Test creating enrollment with optional notes field."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.post(
         f"/courses/{course_id}/enrollments",
         json={
@@ -141,7 +141,7 @@ def test_enrollment_with_notes():
 def test_enrollment_default_progress():
     """Test that enrollment starts with progress_percent of 0 by default."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.post(
         f"/courses/{course_id}/enrollments",
         json={
@@ -157,7 +157,7 @@ def test_enrollment_default_progress():
 def test_lab_without_estimated_minutes():
     """Test creating lab without optional estimated_minutes field."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.post(
         f"/courses/{course_id}/labs",
         json={
@@ -174,7 +174,7 @@ def test_lab_without_estimated_minutes():
 def test_lab_with_summary():
     """Test creating lab with optional summary field."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.post(
         f"/courses/{course_id}/labs",
         json={
@@ -194,7 +194,7 @@ def test_list_courses_shows_updated_counts():
     """Test that listing courses shows correct enrollment and lab counts."""
     # Create course
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Add enrollments
     client.post(
         f"/courses/{course_id}/enrollments",
@@ -204,7 +204,7 @@ def test_list_courses_shows_updated_counts():
         f"/courses/{course_id}/enrollments",
         json={"name": "User 2", "email": "user2@example.com"},
     )
-    
+
     # Add lab
     client.post(
         f"/courses/{course_id}/labs",
@@ -214,7 +214,7 @@ def test_list_courses_shows_updated_counts():
             "resource_uri": "https://example.com/lab1",
         },
     )
-    
+
     # Get single course (not list) to verify counts for this specific course
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
@@ -227,7 +227,7 @@ def test_get_single_course_shows_counts():
     """Test that getting a single course shows correct counts."""
     # Create course
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Add enrollment and lab
     client.post(
         f"/courses/{course_id}/enrollments",
@@ -241,7 +241,7 @@ def test_get_single_course_shows_counts():
             "resource_uri": "https://example.com/lab",
         },
     )
-    
+
     # Get single course
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200

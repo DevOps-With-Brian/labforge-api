@@ -49,6 +49,9 @@ docker-test: ## Run tests inside the api container
 lint: ## Run linting with ruff
 	poetry run ruff check .
 
+lint-fix: ## Fix linting issues with ruff
+	poetry run ruff check . --fix
+
 format: ## Format code with ruff
 	poetry run ruff format .
 

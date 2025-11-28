@@ -146,9 +146,10 @@ def test_lab_exercise_create_zero_estimated_minutes():
 def test_lab_exercise_public_schema():
     """Test LabExercise public schema with all fields."""
     from uuid import UUID
+
     test_id = UUID("12345678-1234-5678-1234-567812345678")
     course_id = UUID("87654321-4321-8765-4321-876543218765")
-    
+
     lab = LabExercise(
         id=test_id,
         course_id=course_id,
@@ -177,7 +178,7 @@ def test_lab_exercise_all_resource_types():
         LabResourceType.link,
         LabResourceType.other,
     ]
-    
+
     for resource_type in resource_types:
         lab = LabExerciseCreate(
             title=f"Lab for {resource_type.value}",
@@ -218,5 +219,6 @@ def test_lab_exercise_uri_max_length():
         resource_type=LabResourceType.link,
         resource_uri=long_uri,
     )
-    # HttpUrl may normalize trailing slashes, so just verify it's close to expected length
+    # HttpUrl may normalize trailing slashes,
+    # so just verify it's close to expected length
     assert len(str(lab.resource_uri)) >= 469

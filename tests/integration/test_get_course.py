@@ -29,7 +29,7 @@ def build_course_payload(**overrides):
 def test_get_course_with_no_enrollments_or_labs():
     """Test getting a course that has no enrollments or labs."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
     data = response.json()
@@ -41,14 +41,14 @@ def test_get_course_with_no_enrollments_or_labs():
 def test_get_course_with_enrollments():
     """Test getting a course with enrollments shows correct count."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Add multiple enrollments
     for i in range(3):
         client.post(
             f"/courses/{course_id}/enrollments",
             json={"name": f"User {i}", "email": f"user{i}@example.com"},
         )
-    
+
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
     assert response.json()["enrollment_count"] == 3
@@ -58,7 +58,7 @@ def test_get_course_with_enrollments():
 def test_get_course_with_labs():
     """Test getting a course with labs shows correct count."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Add multiple labs
     for i in range(2):
         client.post(
@@ -69,7 +69,7 @@ def test_get_course_with_labs():
                 "resource_uri": f"https://example.com/lab{i}",
             },
         )
-    
+
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
     assert response.json()["enrollment_count"] == 0
@@ -79,14 +79,14 @@ def test_get_course_with_labs():
 def test_get_course_with_both_enrollments_and_labs():
     """Test getting a course with both enrollments and labs."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Add enrollments
     for i in range(5):
         client.post(
             f"/courses/{course_id}/enrollments",
             json={"name": f"User {i}", "email": f"user{i}@example.com"},
         )
-    
+
     # Add labs
     for i in range(3):
         client.post(
@@ -97,7 +97,7 @@ def test_get_course_with_both_enrollments_and_labs():
                 "resource_uri": f"https://example.com/lab{i}",
             },
         )
-    
+
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
     assert response.json()["enrollment_count"] == 5
@@ -117,11 +117,11 @@ def test_get_course_returns_all_fields():
         supplemental_urls=["https://example.com"],
     )
     course_id = client.post("/courses", json=payload).json()["id"]
-    
+
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
     data = response.json()
-    
+
     # Verify all fields present
     assert data["id"] == course_id
     assert data["title"] == "Complete Course"
@@ -144,13 +144,13 @@ def test_get_course_returns_all_fields():
 def test_get_course_after_update():
     """Test that getting a course after update returns updated values."""
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
-    
+
     # Update the course
     client.patch(
         f"/courses/{course_id}",
         json={"title": "Updated Title", "status": "archived"},
     )
-    
+
     # Get the course
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
@@ -165,7 +165,7 @@ def test_get_draft_course():
         "/courses",
         json=build_course_payload(status="draft"),
     ).json()["id"]
-    
+
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
     assert response.json()["status"] == "draft"
@@ -177,7 +177,7 @@ def test_get_archived_course():
         "/courses",
         json=build_course_payload(status="archived"),
     ).json()["id"]
-    
+
     response = client.get(f"/courses/{course_id}")
     assert response.status_code == 200
     assert response.json()["status"] == "archived"
