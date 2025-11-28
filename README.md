@@ -59,26 +59,21 @@ labforge-api/
 
 ### Running with Postgres (Docker Compose)
 
-1. Copy `.env.example` to `.env` and adjust values if needed:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Start Postgres and apply migrations:
+1. Start Postgres and apply migrations:
 
    ```bash
    docker compose up -d db
+   DATABASE_URL=postgresql+asyncpg://labforge:labforge@localhost:5432/labforge \
    poetry run alembic upgrade head
    ```
 
-3. Start the API (Compose sets `DATABASE_URL=postgresql+asyncpg://labforge:labforge@db:5432/labforge` inside the container):
+2. Start the API (Compose sets `DATABASE_URL=postgresql+asyncpg://labforge:labforge@db:5432/labforge` inside the container):
 
    ```bash
    docker compose up api
    ```
 
-4. Combined build/run:
+3. Combined build/run:
 
    ```bash
    docker compose up --build
