@@ -7,14 +7,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from app.db.models import Base
 from app.db.session import get_session
 from app.main import app
-
-
-def get_table_names() -> list[str]:
-    """Get all table names from SQLAlchemy metadata."""
-    return list(Base.metadata.tables.keys())
 
 # Configure test database to use NullPool for connection isolation
 test_engine = create_async_engine(
@@ -55,20 +49,26 @@ def reset_db():
         echo=False,
     )
 
-    # Build truncate statement dynamically from metadata
-    table_names = ", ".join(get_table_names())
-    truncate_stmt = f"TRUNCATE TABLE {table_names} RESTART IDENTITY CASCADE"
-
     # Truncate tables before test
     with sync_engine.connect() as conn:
-        conn.execute(text(truncate_stmt))
+        conn.execute(
+            text(
+                "TRUNCATE TABLE lab_exercises, enrollments, courses "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
         conn.commit()
 
     yield
 
     # Truncate tables after test
     with sync_engine.connect() as conn:
-        conn.execute(text(truncate_stmt))
+        conn.execute(
+            text(
+                "TRUNCATE TABLE lab_exercises, enrollments, courses "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
         conn.commit()
 
     sync_engine.dispose()
