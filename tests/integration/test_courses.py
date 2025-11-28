@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-client = TestClient(app)
+client = TestClient(app, raise_server_exceptions=False)
 
 
 def build_course_payload(**overrides):
