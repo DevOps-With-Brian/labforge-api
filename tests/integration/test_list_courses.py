@@ -1,31 +1,11 @@
 """Integration tests for list courses functionality."""
 
 from fastapi.testclient import TestClient
+from tests.conftest import build_course_payload
 
 from app.main import app
 
 client = TestClient(app, raise_server_exceptions=False)
-
-
-def build_course_payload(**overrides):
-    """Build a valid course payload with optional overrides."""
-    payload = {
-        "title": "DevOps With Brian: CI/CD Foundations",
-        "overview": "Hands-on course covering pipelines and Kubernetes delivery.",
-        "instructor": "Brian T",
-        "primary_video_url": "https://youtube.com/devopswithbrian",
-        "supplemental_urls": ["https://github.com/devops-with-brian/sample-repo"],
-        "duration_minutes": 120,
-        "difficulty": "intermediate",
-        "tags": ["devops", "kubernetes"],
-        "prerequisites": ["Basic Git", "Docker fundamentals"],
-        "category": "DevOps",
-        "status": "published",
-    }
-    payload.update(overrides)
-    return payload
-
-
 def test_list_empty_courses():
     """Test listing courses when database is empty."""
     response = client.get("/courses")
