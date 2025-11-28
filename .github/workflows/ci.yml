@@ -146,8 +146,16 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Test Docker Compose
+        env:
+          POSTGRES_DB: labforge
+          POSTGRES_USER: labforge
+          POSTGRES_PASSWORD: labforge
+          POSTGRES_PORT: 5432
+          ENVIRONMENT: development
         run: |
           docker compose up -d
-          sleep 10
+          sleep 15
+          docker compose ps
+          docker compose logs api
           docker compose exec -T api poetry run alembic upgrade head
           docker compose down -v
