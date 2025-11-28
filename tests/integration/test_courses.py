@@ -69,6 +69,59 @@ def test_enrollment_tracking():
     assert updated.json()["tags"] == ["finished"]
 
 
+def test_list_enrollments():
+    """Test listing enrollments returns correct data."""
+    course_id = client.post("/courses", json=build_course_payload()).json()["id"]
+
+    # Initially empty
+    empty_response = client.get(f"/courses/{course_id}/enrollments")
+    assert empty_response.status_code == 200
+    assert empty_response.json() == []
+
+    # Create enrollments
+    first = client.post(
+        f"/courses/{course_id}/enrollments",
+        json={"name": "First Learner", "email": "first@example.com"},
+    )
+    assert first.status_code == 201
+    first_data = first.json()
+
+    second = client.post(
+        f"/courses/{course_id}/enrollments",
+        json={"name": "Second Learner", "email": "second@example.com"},
+    )
+    assert second.status_code == 201
+    second_data = second.json()
+
+    # List enrollments and verify
+    response = client.get(f"/courses/{course_id}/enrollments")
+    assert response.status_code == 200
+    enrollments = response.json()
+    assert len(enrollments) == 2
+
+    # Verify enrollment data is correct
+    enrollment_ids = [e["id"] for e in enrollments]
+    assert first_data["id"] in enrollment_ids
+    assert second_data["id"] in enrollment_ids
+
+    # Verify enrollment fields
+    for enrollment in enrollments:
+        assert "id" in enrollment
+        assert "course_id" in enrollment
+        assert enrollment["course_id"] == course_id
+        assert "name" in enrollment
+        assert "email" in enrollment
+        assert "progress_percent" in enrollment
+        assert enrollment["progress_percent"] == 0
+
+
+def test_list_enrollments_for_nonexistent_course():
+    """Test listing enrollments for a non-existent course returns 404."""
+    missing_id = uuid4()
+    response = client.get(f"/courses/{missing_id}/enrollments")
+    assert response.status_code == 404
+
+
 def test_attach_and_list_labs():
     course_id = client.post("/courses", json=build_course_payload()).json()["id"]
 
