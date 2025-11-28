@@ -18,6 +18,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Remove duplicate enrollments, keeping the earliest one
+    op.execute("""
+        DELETE FROM enrollments
+        WHERE id NOT IN (
+            SELECT MIN(id)
+            FROM enrollments
+            GROUP BY course_id, email
+        )
+    """)
     op.create_unique_constraint(
         "uq_enrollment_course_email", "enrollments", ["course_id", "email"]
     )
