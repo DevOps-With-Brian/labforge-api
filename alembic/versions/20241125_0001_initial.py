@@ -76,33 +76,6 @@ def upgrade() -> None:
         )
     )
 
-    # Create trigger function to auto-update updated_at column
-    op.execute(
-        sa.text(
-            """
-            CREATE OR REPLACE FUNCTION update_updated_at_column()
-            RETURNS TRIGGER AS $$
-            BEGIN
-                NEW.updated_at = NOW();
-                RETURN NEW;
-            END;
-            $$ language 'plpgsql';
-            """
-        )
-    )
-
-    # Create trigger on courses table to auto-update updated_at
-    op.execute(
-        sa.text(
-            """
-            CREATE TRIGGER update_courses_updated_at
-                BEFORE UPDATE ON courses
-                FOR EACH ROW
-                EXECUTE FUNCTION update_updated_at_column();
-            """
-        )
-    )
-
     op.create_table(
         "enrollments",
         sa.Column("id", sa.String(length=36), primary_key=True),
@@ -149,13 +122,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Drop trigger first (before dropping the table)
-    op.execute(
-        sa.text("DROP TRIGGER IF EXISTS update_courses_updated_at ON courses")
-    )
-    # Drop trigger function
-    op.execute(sa.text("DROP FUNCTION IF EXISTS update_updated_at_column()"))
-
     op.drop_table("lab_exercises")
     op.drop_table("enrollments")
     op.drop_table("courses")
