@@ -29,7 +29,7 @@ class Course(Base):
     supplemental_urls: Mapped[list[str]] = mapped_column(JSON, default=lambda: [])
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
     difficulty: Mapped[str] = mapped_column(String(20), default="intermediate")
-    tags: Mapped[list[str]] = mapped_column(JSON, default_factory=list)
+    tags: Mapped[list[str]] = mapped_column(JSON, default=lambda: [])
     prerequisites: Mapped[list[str]] = mapped_column(JSON, default=lambda: [])
     category: Mapped[str | None] = mapped_column(String(80), nullable=True)
     status: Mapped[CourseStatus] = mapped_column(
