@@ -34,7 +34,7 @@ def test_course_create_with_invalid_url():
     }
     with pytest.raises(ValidationError) as exc_info:
         CourseCreate(**course_data)
-    
+
     assert "primary_video_url" in str(exc_info.value)
 
 
@@ -49,7 +49,7 @@ def test_course_create_requires_title():
     }
     with pytest.raises(ValidationError) as exc_info:
         CourseCreate(**course_data)
-    
+
     assert "title" in str(exc_info.value)
 
 
@@ -65,7 +65,7 @@ def test_course_title_max_length():
     }
     with pytest.raises(ValidationError) as exc_info:
         CourseCreate(**course_data)
-    
+
     assert "title" in str(exc_info.value)
 
 
@@ -81,7 +81,7 @@ def test_course_duration_must_be_positive():
     }
     with pytest.raises(ValidationError) as exc_info:
         CourseCreate(**course_data)
-    
+
     assert "duration_minutes" in str(exc_info.value)
 
 
@@ -97,7 +97,7 @@ def test_course_status_enum_validation():
     }
     with pytest.raises(ValidationError) as exc_info:
         CourseCreate(**course_data)
-    
+
     assert "status" in str(exc_info.value)
 
 

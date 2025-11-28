@@ -11,7 +11,6 @@ from app.db.models import Enrollment as EnrollmentModel
 from app.db.models import LabExercise as LabExerciseModel
 from app.db.session import get_session
 from app.schemas import (
-    Course,
     CourseCreate,
     CoursePublic,
     CourseUpdate,
@@ -24,9 +23,7 @@ from app.schemas import (
 router = APIRouter()
 
 
-async def _get_course_or_404(
-    session: AsyncSession, course_id: str
-) -> CourseModel:
+async def _get_course_or_404(session: AsyncSession, course_id: str) -> CourseModel:
     course = await session.get(CourseModel, course_id)
     if not course:
         raise HTTPException(
@@ -35,9 +32,7 @@ async def _get_course_or_404(
     return course
 
 
-async def _counts(
-    session: AsyncSession, course_id: str
-) -> tuple[int, int]:
+async def _counts(session: AsyncSession, course_id: str) -> tuple[int, int]:
     enrollment_count = await session.scalar(
         select(func.count(EnrollmentModel.id)).where(
             EnrollmentModel.course_id == course_id
@@ -51,9 +46,7 @@ async def _counts(
     return int(enrollment_count or 0), int(lab_count or 0)
 
 
-async def _to_public(
-    session: AsyncSession, course: CourseModel
-) -> CoursePublic:
+async def _to_public(session: AsyncSession, course: CourseModel) -> CoursePublic:
     enrollment_count, lab_count = await _counts(session, course.id)
     base = CoursePublic.model_validate(course, from_attributes=True)
     return base.model_copy(
@@ -121,9 +114,7 @@ async def create_enrollment(
 ) -> Enrollment:
     """Enroll a learner in a self-paced course."""
     await _get_course_or_404(session, course_id)
-    enrollment = EnrollmentModel(
-        course_id=course_id, **payload.model_dump(mode="json")
-    )
+    enrollment = EnrollmentModel(course_id=course_id, **payload.model_dump(mode="json"))
     session.add(enrollment)
     await session.commit()
     await session.refresh(enrollment)
@@ -177,6 +168,4 @@ async def list_labs(
             select(LabExerciseModel).where(LabExerciseModel.course_id == course_id)
         )
     ).scalars()
-    return [
-        LabExercise.model_validate(lab, from_attributes=True) for lab in labs
-    ]
+    return [LabExercise.model_validate(lab, from_attributes=True) for lab in labs]

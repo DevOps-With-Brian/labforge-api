@@ -7,12 +7,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from app.db.session import async_session_factory, engine, get_session
+from app.db.session import get_session
 from app.main import app
 
 # Configure test database to use NullPool for connection isolation
 test_engine = create_async_engine(
-    os.getenv("DATABASE_URL", "postgresql+asyncpg://labforge:labforge@localhost:5432/labforge"),
+    os.getenv(
+        "DATABASE_URL", "postgresql+asyncpg://labforge:labforge@localhost:5432/labforge"
+    ),
     poolclass=NullPool,  # Don't pool connections in tests
     echo=False,
 )
@@ -41,17 +43,27 @@ def reset_db():
         poolclass=NullPool,
         echo=False,
     )
-    
+
     # Truncate tables before test
     with sync_engine.connect() as conn:
-        conn.execute(text("TRUNCATE TABLE lab_exercises, enrollments, courses RESTART IDENTITY CASCADE"))
+        conn.execute(
+            text(
+                "TRUNCATE TABLE lab_exercises, enrollments, courses "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
         conn.commit()
-    
+
     yield
-    
+
     # Truncate tables after test
     with sync_engine.connect() as conn:
-        conn.execute(text("TRUNCATE TABLE lab_exercises, enrollments, courses RESTART IDENTITY CASCADE"))
+        conn.execute(
+            text(
+                "TRUNCATE TABLE lab_exercises, enrollments, courses "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
         conn.commit()
-    
+
     sync_engine.dispose()

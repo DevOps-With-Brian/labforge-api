@@ -27,7 +27,7 @@ def test_enrollment_create_requires_name():
     }
     with pytest.raises(ValidationError) as exc_info:
         EnrollmentCreate(**enrollment_data)
-    
+
     assert "name" in str(exc_info.value)
 
 
@@ -38,7 +38,7 @@ def test_enrollment_create_requires_email():
     }
     with pytest.raises(ValidationError) as exc_info:
         EnrollmentCreate(**enrollment_data)
-    
+
     assert "email" in str(exc_info.value)
 
 
@@ -50,7 +50,7 @@ def test_enrollment_create_validates_email_format():
     }
     with pytest.raises(ValidationError) as exc_info:
         EnrollmentCreate(**enrollment_data)
-    
+
     assert "email" in str(exc_info.value)
 
 
@@ -62,7 +62,7 @@ def test_enrollment_name_min_length():
     }
     with pytest.raises(ValidationError) as exc_info:
         EnrollmentCreate(**enrollment_data)
-    
+
     assert "name" in str(exc_info.value)
 
 
@@ -74,7 +74,7 @@ def test_enrollment_name_max_length():
     }
     with pytest.raises(ValidationError) as exc_info:
         EnrollmentCreate(**enrollment_data)
-    
+
     assert "name" in str(exc_info.value)
 
 
@@ -87,7 +87,7 @@ def test_enrollment_notes_max_length():
     }
     with pytest.raises(ValidationError) as exc_info:
         EnrollmentCreate(**enrollment_data)
-    
+
     assert "notes" in str(exc_info.value)
 
 
@@ -112,7 +112,7 @@ def test_enrollment_progress_cannot_exceed_100():
             course_id=uuid4(),
             progress_percent=150,  # Invalid: > 100
         )
-    
+
     assert "progress_percent" in str(exc_info.value)
 
 
@@ -125,5 +125,5 @@ def test_enrollment_progress_cannot_be_negative():
             course_id=uuid4(),
             progress_percent=-10,  # Invalid: < 0
         )
-    
+
     assert "progress_percent" in str(exc_info.value)

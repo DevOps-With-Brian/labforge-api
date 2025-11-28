@@ -26,7 +26,9 @@ class CourseBase(APIModel):
     primary_video_url: HttpUrl
     supplemental_urls: list[HttpUrl] = Field(default_factory=list)
     duration_minutes: int = Field(..., gt=0, lt=14_400)  # up to 10 days of content
-    difficulty: str = Field(default="intermediate", pattern="^(beginner|intermediate|advanced)$")
+    difficulty: str = Field(
+        default="intermediate", pattern="^(beginner|intermediate|advanced)$"
+    )
     tags: list[str] = Field(default_factory=list)
     prerequisites: list[str] = Field(default_factory=list)
     category: str | None = Field(None, max_length=80)
@@ -47,9 +49,7 @@ class CourseUpdate(APIModel):
     primary_video_url: HttpUrl | None = None
     supplemental_urls: list[HttpUrl] | None = None
     duration_minutes: int | None = Field(None, gt=0, lt=14_400)
-    difficulty: str | None = Field(
-        None, pattern="^(beginner|intermediate|advanced)$"
-    )
+    difficulty: str | None = Field(None, pattern="^(beginner|intermediate|advanced)$")
     tags: list[str] | None = None
     prerequisites: list[str] | None = None
     category: str | None = Field(None, max_length=80)
