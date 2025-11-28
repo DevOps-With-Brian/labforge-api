@@ -154,7 +154,20 @@ jobs:
           ENVIRONMENT: development
         run: |
           docker compose up -d
-          sleep 15
+          # Wait for API service to be ready
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8000/health > /dev/null; then
+              echo "API is up!"
+              break
+            else
+              echo "Waiting for API to be ready..."
+              sleep 2
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "API did not become ready in time." >&2
+              exit 1
+            fi
+          done
           docker compose ps
           docker compose logs api
           docker compose exec -T api poetry run alembic upgrade head

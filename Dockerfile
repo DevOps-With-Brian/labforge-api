@@ -5,19 +5,18 @@ WORKDIR /app
 # Install poetry
 RUN pip install poetry
 
-# Copy project metadata (changes less frequently)
+# Copy poetry files
+# Copy project metadata, README (needed for poetry build), and source
 COPY pyproject.toml poetry.lock* README.md ./
+COPY app ./app
+COPY alembic ./alembic
+COPY alembic.ini ./
 
 # Configure poetry to not create a virtual environment
 RUN poetry config virtualenvs.create false
 
-# Install dependencies (cached unless metadata changes)
+# Install dependencies (including installing the current project)
 RUN poetry install --no-interaction --no-ansi --only main
-
-# Copy source code (changes more frequently)
-COPY app ./app
-COPY alembic ./alembic
-COPY alembic.ini ./
 
 # Expose port
 EXPOSE 8000
